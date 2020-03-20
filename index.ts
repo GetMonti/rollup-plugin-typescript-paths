@@ -5,6 +5,7 @@ import { Plugin } from 'rollup';
 export const typescriptPaths = ({
 	tsConfigPath = findConfigFile('./', sys.fileExists),
 	absolute = true,
+	assumeTranspiled = true,
 	transform,
 }: Options = {}): Plugin => {
 	const { compilerOptions, outDir } = getTsConfig(tsConfigPath);
@@ -36,9 +37,9 @@ export const typescriptPaths = ({
 				return null;
 			}
 
-			const jsFileName = join(outDir, resolvedFileName.replace(/\.tsx?$/i, '.js'));
+			const fileName = assumeTranspiled ? join(outDir, resolvedFileName.replace(/\.tsx?$/i, '.js')) : resolvedFileName;
 
-			let resolved = absolute ? sys.resolvePath(jsFileName) : jsFileName;
+			let resolved = absolute ? sys.resolvePath(fileName) : fileName;
 
 			if (transform) {
 				resolved = transform(resolved);
@@ -78,6 +79,12 @@ export interface Options {
 	 * Whether to resolve to absolute paths or not; defaults to `true`.
 	 */
 	absolute?: boolean;
+
+	/**
+	 * Whether to assume the file will be transpiled to JavaScript before it is
+	 * imported. Defaults to `true`.
+	 */
+	assumeTranspiled?: boolean;
 
 	/**
 	 * If the plugin successfully resolves a path, this function allows you to
